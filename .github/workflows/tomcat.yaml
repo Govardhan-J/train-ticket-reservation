@@ -105,29 +105,4 @@ jobs:
 
           echo "Deploying WAR file..."
           curl -v -u "$USER:$PASS" --fail --show-error -T "$WAR_FILE" \
-            "$URL/deploy?path=/train-ticket-reservation&update=true" 
-
-  deploy-pod:    
-      needs: build
-      runs-on:  ubuntu-latest
-
-      steps:
-      - uses: actions/download-artifact@v4
-        with:
-          name: war-file
-
-      - name:  Deploy to POD
-        env:
-          URL: ${{ secrets.TOMCAT_URL_POD }}
-          USER: ${{ secrets.TOMCAT_USER_POD }}
-          PASS: ${{ secrets.TOMCAT_PASS_POD }}
-        run: |
-          WAR_FILE=$(ls *.war | head -n 1)
-          echo "Deploying $WAR_FILE to POD ($URL)"
-
-          echo "Checking Tomcat Manager access..."
-          curl -v -u "$USER:$PASS" "$URL/list"
-
-          echo "Deploying WAR file..."
-          curl -v -u "$USER:$PASS" --fail --show-error -T "$WAR_FILE" \
             "$URL/deploy?path=/train-ticket-reservation&update=true"
