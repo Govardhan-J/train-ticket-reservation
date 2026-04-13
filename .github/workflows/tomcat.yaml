@@ -1,45 +1,29 @@
 name: Build and Deploy train-ticket-reservation
-
 on:
   push:
     branches:
       - master
   workflow_dispatch:
-
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
       - name: Set up Java
         uses: actions/setup-java@v4
         with:
-          distribution: 'temurin'
+          distribution: temurin
           java-version: '17'
-
       - name: Build with Maven
         run: mvn clean package -DskipTests
-
       - name: Find WAR file
         run: echo "WAR_FILE=$(ls target/*.war | head -n 1)" >> $GITHUB_ENV
-
       - name: Upload WAR artifact
         uses: actions/upload-artifact@v4
         with:
           name: war-file
           path: ${{ env.WAR_FILE }}
-
-      # ✅ FIX: Add AWS credentials step WITH region
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ap-south-1   # 👈 REQUIRED (Mumbai region)
-
       - name: SonarQube Analysis
         run: |
           mvn sonar:sonar \
