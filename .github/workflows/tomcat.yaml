@@ -1,38 +1,51 @@
-name: ci/cd pipeline to deploy to tomcat
-on: 
+name: CI-CD Pipeline
+
+on:
   push:
-    branches: master
+    branches: [ "main" ]
+
 jobs:
-  build-deploy:
+  build:
     runs-on: ubuntu-latest
+
     steps:
-      - name: checkout code
-        uses: actions/checkout@v3
-      
-      - name: set-up jdk
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'temurin'
-          java-version: '17'   # Updated Java version
-      
-      - name: validate with maven
-        run: mvn validate
+    # ---------------------------
+    # Checkout Code
+    # ---------------------------
+    - name: Checkout code
+      uses: actions/checkout@v4
 
-      - name: compile with maven
-        run: mvn compile
-      
-      - name: test with maven
-        run: mvn test
-      
-      - name: package with maven
-        run: mvn clean package
+    # ---------------------------
+    # Setup Java
+    # ---------------------------
+    - name: Set up JDK
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
 
-      - name: verify WAR file
-        run: ls -lh target/
-        
-      - name: Sonar scan 
-        run: |
-           mvn clean verify sonar:sonar \
-            -Dsonar.projectKey=train-ticket-reservation \
-            -Dsonar.host.url="${{ secrets.SONAR_HOST }}" \
-            -Dsonar.login="${{ secrets.SONAR_TOKEN }}"
+    # ---------------------------
+    # Build WAR
+    # ---------------------------
+    - name: Build with Maven
+      run: mvn clean package
+
+    - name: Verify WAR file
+      run: ls -l target/
+
+    # ✅ IMPORTANT FIX (UPLOAD ARTIFACT)
+    - name: Upload WAR artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: war-file
+        path: target/*.war
+
+    # ---------------------------
+    # SonarQube Analysis
+    # ---------------------------
+    - name: Sonar scan
+      run: |
+        mvn sonar:sonar \
+          -Dsonar.projectKey=train-ticket-reservation \
+          -Dsonar.host.url="${{ secrets.SONAR_HOST }}" \
+          -Dsonar.login="${{ secrets.SONAR_TOKEN }}"
