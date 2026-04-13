@@ -32,9 +32,17 @@ jobs:
           name: war-file
           path: ${{ env.WAR_FILE }}
 
+      # ✅ FIX: Add AWS credentials step WITH region
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-south-1   # 👈 REQUIRED (Mumbai region)
+
       - name: SonarQube Analysis
         run: |
-         mvn sonar:sonar \
-         -Dsonar.projectKey=train-ticket-reservation \
-         -Dsonar.host.url=${{ secrets.SONAR_HOST_URL }} \
-         -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+          mvn sonar:sonar \
+          -Dsonar.projectKey=train-ticket-reservation \
+          -Dsonar.host.url=${{ secrets.SONAR_HOST_URL }} \
+          -Dsonar.login=${{ secrets.SONAR_TOKEN }}
