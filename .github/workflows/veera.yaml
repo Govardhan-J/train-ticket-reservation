@@ -99,12 +99,6 @@ jobs:
           VERSION=$(basename $WAR_FILE | sed -E 's/.*-([0-9]+.*)\.war/\1/')
           echo "VERSION=$VERSION"
 
-          if [[ "$VERSION" == *"SNAPSHOT"* ]]; then
-            REPO_URL="${{ secrets.NEXUS_SNAPSHOT_URL }}"
-          else
-            REPO_URL="${{ secrets.NEXUS_RELEASE_URL }}"
-          fi
-
           mvn deploy:deploy-file \
             -DgroupId=TrainBook \
             -DartifactId=TrainBook \
